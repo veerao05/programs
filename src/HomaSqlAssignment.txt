@@ -1,0 +1,64 @@
+/* create query for PLAYERS */
+create table PLAYERS ( player_id int not null , team varchar(25)  , homeland varchar(25) ,market_value double(40,2), PRIMARY KEY(player_id) );
+
+/* Inserting values in table PLAYERS */
+insert into PLAYERS(player_id  , team   , homeland  ,market_value) values(34546,'FCB','argentina',12.2);
+insert into PLAYERS(player_id  , team   , homeland  ,market_value) values(34547,'FCB','spain',8.6)
+insert into PLAYERS(player_id  , team   , homeland  ,market_value) values(34548,'PSG','brazil',9.8)
+
+
+/* create query for GOALS */
+create table GOALS (goal_id int ,player_id int not null , time_stamp timestamp, beauty double(40,2),FOREIGN KEY (player_id) REFERENCES PLAYERS(player_id))
+
+/* Inserting values in table GOALS */
+insert into GOALS(goal_id,player_id,time_stamp,beauty) values ( 167,34546,'2016-11-23 00:10:03',0.89);
+insert into GOALS(goal_id,player_id,time_stamp,beauty) values (158,34548,'2016-11-23 02:56:32',0.27);
+
+Query Solutions:
+/*The goals whose beauty is above 0.9 or below 0.1*/
+SELECT DISTINCT(goals.beauty) from GOALS  goals WHERE goals.beauty > 0.9  OR goals.beauty < 0.1 ;
+
+/*The players of 'FCB' who have scored at least 1 goal.*/
+SELECT * FROM PLAYERS  players JOIN GOALS goals on players.player_id = goals.player_id
+WHERE players.team='FCB'
+GROUP BY goals.goal_id
+HAVING COUNT(goals.goal_id) >= 1
+
+
+/*The players of 'FCB' whose market valuation is lower than 8.0 and who scored at least 10 goals*/
+
+SELECT * FROM PLAYERS  players , GOALS goals
+WHERE players.player_id = goals.player_id AND players.team='FCB' AND players.market_value <8.0
+GROUP BY goals.goal_id
+HAVING COUNT(goals.goal_id) >= 10
+
+/*The number of goals scored for each team and homeland on Nov. 22nd 2016*/
+SELECT players.team,players.homeland,COUNT(goals.goal_id) as goal_count
+FROM PLAYERS  players
+JOIN GOALS goals
+ON players.player_id=goals.player_id
+WHERE time_stamp BETWEEN '2016-11-22 00:00:00' AND '2016-11-22 11:59:59'
+GROUP BY goals.goal_id
+
+
+/*The average goal beauty over all the players of the 'PSG' team*/
+Note : Adding additional insert values to test the query
+insert into PLAYERS(player_id  , team   , homeland  ,market_value) values(34549,'FCB','France',9.0);
+insert into GOALS(goal_id,player_id,time_stamp,beauty) values (159,34549,'2016-11-24 02:50:32',0.11);
+
+SELECT AVG(goals.beauty) from GOALS goals , PLAYERS players WHERE players.player_id=goals.player_id AND players.team='FCB';
+
+
+/*A query that returns the couples: (player_id, goal_id) for every player*/
+SELECT A.player_id, ifnull(B.goal_id,0) as goal_id FROM PLAYERS AS A LEFT OUTER JOIN  GOALS AS B ON A.player_id = B.player_id
+
+
+/*How would you rewrite the following query without a subquery?*/
+/*SELECT *, team
+FROM PLAYERS AS A
+WHERE A.player_id NOT IN (SELECT B.player_id FROM GOALS AS B) GROUP BY team*/
+
+solution fot NOT IN :
+SELECT count(*),team FROM PLAYERS players
+LEFT OUTER JOIN GOALS goals ON players.player_id= goals.player_id
+WHERE goals.goal_id IS NULL;
