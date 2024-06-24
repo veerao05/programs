@@ -174,6 +174,14 @@ public class Java8Employee {
             System.out.println(entry.getKey() + " : " + entry.getValue());
         }
 
+        //Print the average salary by age
+        Map<Integer, Double> averageSalByAge = empList.stream().collect(Collectors.groupingBy(Employee1::getAge,Collectors.averagingLong(Employee1::getSalary)));
+
+        averageSalByAge.forEach((key, value) -> System.out.println("Age : "
+                .concat(key.toString())
+                .concat(" Average Salary : ")
+                .concat(value.toString())
+        ));
 
         //Find oldest employee
         Optional<Employee1> oldestEmp = empList.stream()
@@ -194,13 +202,12 @@ public class Java8Employee {
 
         Set<Map.Entry<Boolean, List<Employee1>>> empSet = partitionEmployeesByAge.entrySet();
 
-        for (Map.Entry<Boolean, List<Employee1>> entry : empSet) {
-            if (Boolean.TRUE.equals(entry.getKey())) {
-                System.out.println("Employees greater than 30 years ::" + entry.getValue());
-            } else {
-                System.out.println("Employees less than 30 years ::" + entry.getValue());
-            }
-        }
+        empSet.stream().filter(entry -> entry.getKey().equals(Boolean.TRUE))
+                .forEach(e -> System.out.println("Employees older than 30 years : ".concat(e.getValue().toString())));
+
+        empSet.stream().filter(entry -> entry.getKey().equals(Boolean.FALSE))
+                .forEach(e -> System.out.println("Employees younger than 30 years : ".concat(e.getValue().toString())));
+
 
         //Find the department name which has the highest number of employees
         Map.Entry<String, Long> maxNoOfEmployeesInDept = empList.stream().collect(Collectors.groupingBy(Employee1::getDeptName, Collectors.counting())).
@@ -244,9 +251,7 @@ public class Java8Employee {
 
         // Find the department which has the highest number of employees.
         Optional<Map.Entry<String, Long>> deptNameWithHighestEmp = employeeCountInDepartmentMap.entrySet().stream().max(Map.Entry.comparingByValue());
-        if (deptNameWithHighestEmp.isPresent()) {
-            System.out.println("Department which has the highest number of employees " + deptNameWithHighestEmp.get());
-        }
+        deptNameWithHighestEmp.ifPresent(stringLongEntry -> System.out.println("Department which has the highest number of employees " + stringLongEntry));
 
 
         // Sorting a Stream by age and name fields
@@ -283,8 +288,7 @@ public class Java8Employee {
 
 
         //Find Highest salary in the organisation
-        Optional<Employee1> empHighest = empList.stream()
-                .sorted(Comparator.comparingDouble(Employee1::getSalary).reversed()).findFirst();
+        Optional<Employee1> empHighest = empList.stream().max(Comparator.comparingDouble(Employee1::getSalary));
 
         System.out.println("Highest Salary in the organisation : " + empHighest.get().getSalary());
 

@@ -1,6 +1,5 @@
 package com.concepts.producerconsumer;
 
-import sun.awt.windows.ThemeReader;
 
 import java.util.LinkedList;
 import java.util.Queue;
